@@ -6,6 +6,7 @@ if (!isset($_SESSION['accounts'])) {
     $_SESSION['accounts'] = [];
 }
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' and $_SERVER['REQUEST_URI'] === '/reset') {
     $_SESSION['accounts'] = []; 
     http_response_code(200);
@@ -18,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' and $_SERVER['REQUEST_URI'] === '/rese
         $account_id = $_GET['account_id'] ?? null;
         $exist = accountFinder($account_id);
 
-        if ($exist != null) {
+        if ($exist != 'N') {
             http_response_code(200);
             echo json_encode($exist);
         } else {
@@ -33,13 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' and $_SERVER['REQUEST_URI'] === '/rese
         $destination = $data['destination'];
         $amount = $data['amount'];
         $exist = accountFinder($destination);
-        if ($exist == null) {
+        if ($exist == '1') {
             $_SESSION['accounts'][$destination] = ['id' => $destination, 'balance' => $amount];
             $newArray = accountFinder($destination);
             http_response_code(201);
             echo json_encode(['destination' => $newArray]);
         } else {
-            $exist['balance'] += $amount;
+            $accountNewValue = $exist['balance'] + $amount;
+            $exist['balance'] = $accountNewValue;
             http_response_code(201);
             echo json_encode(['destination' => $exist]); 
         }
@@ -61,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' and $_SERVER['REQUEST_URI'] === '/rese
         $existOrigin = accountFinder($origin);
         $existDestination = accountFinder($destination);
         
-        if ($existOrigin != null && $existDestination != null && $existOrigin['balance'] >= $amount) {
+        if ($existOrigin != 'N' && $existDestination != 'N' && $existOrigin['balance'] >= $amount) {
             $_SESSION['accounts'][$origin]['balance'] -= $amount;       
             $_SESSION['accounts'][$destination]['balance'] += $amount;
             http_response_code(201);
@@ -81,6 +83,6 @@ function accountFinder($id) {
     if (isset($_SESSION['accounts'][$id])) {
         return $_SESSION['accounts'][$id];
     } else {
-        return null;
+        return 'N';
     }
 }
