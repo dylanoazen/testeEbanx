@@ -60,3 +60,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' and $_SERVER['REQUEST_URI'] === '/even
 }
 
 http_response_code(404);
+
+
+//Comandos testados com sucesso via curl
+// curl -X POST http://localhost:8000/reset
+// curl -X GET "http://localhost:8000/balance?account_id=1234"
+//curl -X POST -H "Content-Type: application/json" -d '{"type":"deposit", "destination":"100", "amount":10}' http://localhost:8000/event
