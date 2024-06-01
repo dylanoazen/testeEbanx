@@ -10,22 +10,25 @@ $accounts = &$_SESSION['accounts'];
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SERVER['REQUEST_URI'] === '/reset') {
     $_SESSION['accounts'] = [];
     http_response_code(200);
+    echo "OK";
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_SERVER['REQUEST_URI'] === '/balance') {
     $account_id = $_GET['account_id'] ?? null;
-    if (isset($accounts[$account_id])) {
+    if ($account_id !== null && isset($accounts[$account_id])) {
         http_response_code(200);
-        echo json_encode($accounts[$account_id]);
+        echo $accounts[$account_id]['balance']; // Retorna o saldo como um valor puro
     } else {
         http_response_code(404);
+        echo json_encode(0);
     }
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SERVER['REQUEST_URI'] === '/event') {
     $data = json_decode(file_get_contents('php://input'), true);
+    
     if ($data['type'] === 'deposit') {
         $destination = $data['destination'];
         $amount = $data['amount'];
@@ -41,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SERVER['REQUEST_URI'] === '/event
         $amount = $data['amount'];
         if (!isset($accounts[$origin]) || $accounts[$origin]['balance'] < $amount) {
             http_response_code(404);
+            echo json_encode(0);
         } else {
             $accounts[$origin]['balance'] -= $amount;
             http_response_code(201);
@@ -52,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SERVER['REQUEST_URI'] === '/event
         $amount = $data['amount'];
         if (!isset($accounts[$origin]) || $accounts[$origin]['balance'] < $amount) {
             http_response_code(404);
+            echo json_encode(0);
         } else {
             if (!isset($accounts[$destination])) {
                 $accounts[$destination] = ['id' => $destination, 'balance' => 0];
@@ -68,3 +73,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_SERVER['REQUEST_URI'] === '/event
 }
 
 http_response_code(404);
+echo json_encode(0);
